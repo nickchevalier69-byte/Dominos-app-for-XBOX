@@ -26,13 +26,28 @@ jobs:
           ref: v3.6.2
           path: mbedtls
 
-      - name: Create stub sal.h and configure mbedtls for NXDK
+      - name: Create stub headers and configure mbedtls for NXDK
         run: |
           mkdir -p mbedtls/include/mbedtls
+
           cat << 'EOF' > mbedtls/include/sal.h
           #pragma once
           #define _Check_return_
           EOF
+
+          cat << 'EOF' > mbedtls/include/winsock2.h
+          #pragma once
+          #include <lwip/inet.h>
+          EOF
+
+          cat << 'EOF' > mbedtls/include/ws2tcpip.h
+          #pragma once
+          #include <lwip/inet.h>
+          #ifndef inet_pton
+          #define inet_pton lwip_inet_pton
+          #endif
+          EOF
+
           sed -i 's|^#define MBEDTLS_TIMING_C|//#define MBEDTLS_TIMING_C|' mbedtls/include/mbedtls/mbedtls_config.h
           sed -i 's|^#define MBEDTLS_NET_C|//#define MBEDTLS_NET_C|' mbedtls/include/mbedtls/mbedtls_config.h
           sed -i 's|^#define MBEDTLS_FS_IO|//#define MBEDTLS_FS_IO|' mbedtls/include/mbedtls/mbedtls_config.h
