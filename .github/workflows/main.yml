@@ -23,7 +23,7 @@ jobs:
 
       - name: Compile XBE
         run: |
-          touch mbedtls/include/sal.h
+          echo "#define _Check_return_" > mbedtls/include/sal.h
           export PATH="/usr/src/nxdk/bin:$PATH"
           make -C client
 
