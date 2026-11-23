@@ -14,6 +14,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Clone mbedtls
+        run: git clone --depth 1 --branch v2.28.8 https://github.com mbedtls
+
       - name: Compile XBE
         run: export PATH="/usr/src/nxdk/bin:$PATH" && make -C client
 
@@ -21,4 +24,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Dominos-Xbox-App
-          path: client/**/*.xbe
+          path: |
+            client/**/*.xbe
+            client/**/vegur-regular.ttf
+            client/**/cacert.pem
+            client/**/logo_s.png
+            client/**/logo_l.png
