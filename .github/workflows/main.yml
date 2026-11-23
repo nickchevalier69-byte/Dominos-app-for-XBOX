@@ -23,9 +23,8 @@ jobs:
 
       - name: Create stub sal.h and configure mbedtls for NXDK
         run: |
-          # Create minimal sal.h for MSVC/Windows SAL annotations if referenced
-          mkdir -p XBOX/client/include
-          cat << 'EOF' > XBOX/client/include/sal.h
+          mkdir -p XBOX/client
+          cat << 'EOF' > XBOX/client/sal.h
           #pragma once
           #define _In_
           #define _In_opt_
@@ -35,14 +34,13 @@ jobs:
           #define _Inout_opt_
           #define _Ret_maybenull_
           EOF
+          cp XBOX/client/sal.h ./sal.h
 
-          # Disable Windows bcrypt.h entropy and enable custom hardware entropy
           cat << 'EOF' >> mbedtls/include/mbedtls/mbedtls_config.h
           #define MBEDTLS_NO_PLATFORM_ENTROPY
           #define MBEDTLS_ENTROPY_HARDWARE_ALT
           EOF
 
-          # Create Xbox hardware entropy implementation using CPU cycle counter jitter
           cat << 'EOF' > XBOX/client/xbox_entropy.c
           #include <stddef.h>
           #include <stdint.h>
@@ -61,16 +59,19 @@ jobs:
           }
           EOF
 
-          # Ensure xbox_entropy.c is compiled if SRCS is listed explicitly in Makefile
-          if grep -q "^SRCS" XBOX/client/Makefile; then
-            sed -i 's|^SRCS[[:space:]]*=|SRCS = xbox_entropy.c |' XBOX/client/Makefile
+          MAKEFILE_PATH=$(find . -maxdepth 3 -name "Makefile" | head -n 1)
+          echo "Found Makefile at: $MAKEFILE_PATH"
+          if [ -n "$MAKEFILE_PATH" ] && grep -q "^SRCS" "$MAKEFILE_PATH"; then
+            sed -i 's|^SRCS[[:space:]]*=|SRCS = XBOX/client/xbox_entropy.c |' "$MAKEFILE_PATH"
           fi
 
       - name: Compile XBE
-        run: make -C XBOX/client
+        run: |
+          MAKEFILE_DIR=$(dirname "$(find . -maxdepth 3 -name "Makefile" | head -n 1)")
+          make -C "$MAKEFILE_DIR"
 
       - name: Upload XBE Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Dominos-app-for-XBOX
-          path: XBOX/client/*.xbe
+          path: "**/*.xbe"
