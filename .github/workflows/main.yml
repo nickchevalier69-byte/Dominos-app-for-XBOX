@@ -37,6 +37,8 @@ jobs:
           sed -i 's|^#define MBEDTLS_NET_C|//#define MBEDTLS_NET_C|' mbedtls/include/mbedtls/mbedtls_config.h
           sed -i 's|^#define MBEDTLS_FS_IO|//#define MBEDTLS_FS_IO|' mbedtls/include/mbedtls/mbedtls_config.h
           sed -i 's|^#define MBEDTLS_ENTROPY_PLATFORM|//#define MBEDTLS_ENTROPY_PLATFORM|' mbedtls/include/mbedtls/mbedtls_config.h
+          sed -i 's|^#define MBEDTLS_PSA_ITS_FILE_C|//#define MBEDTLS_PSA_ITS_FILE_C|' mbedtls/include/mbedtls/mbedtls_config.h
+          sed -i 's|^#define MBEDTLS_PSA_CRYPTO_STORAGE_C|//#define MBEDTLS_PSA_CRYPTO_STORAGE_C|' mbedtls/include/mbedtls/mbedtls_config.h
 
       - name: Compile XBE
         run: |
