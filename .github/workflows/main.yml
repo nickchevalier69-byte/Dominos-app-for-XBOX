@@ -37,9 +37,9 @@ jobs:
 
       - name: Compile XBE
         run: |
-          MAKEFILE_DIR=$(dirname "$(find . -path ./mbedtls -prune -o -maxdepth 3 -name "Makefile" -print | head -n 1)")
-          echo "Building in: $MAKEFILE_DIR"
-          make -C "$MAKEFILE_DIR"
+          export NXDK_DIR=/usr/src/nxdk
+          export PATH="$NXDK_DIR/bin:$PATH"
+          make -C ./client
 
       - name: Upload XBE Artifact
         uses: actions/upload-artifact@v4
