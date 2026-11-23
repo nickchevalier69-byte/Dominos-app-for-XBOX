@@ -1,18 +1,22 @@
 name: Build Xbox XBE
 
 on:
-  workflow_dispatch:
   push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/xboxdev/nxdk:latest
+      image: nxdk/nxdk:latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Checkout mbedtls v3.6.2
         uses: actions/checkout@v4
@@ -20,58 +24,26 @@ jobs:
           repository: Mbed-TLS/mbedtls
           ref: v3.6.2
           path: mbedtls
+          submodules: recursive
 
       - name: Create stub sal.h and configure mbedtls for NXDK
         run: |
-          mkdir -p XBOX/client
-          cat << 'EOF' > XBOX/client/sal.h
-          #pragma once
-          #define _In_
-          #define _In_opt_
-          #define _Out_
-          #define _Out_opt_
-          #define _Inout_
-          #define _Inout_opt_
-          #define _Ret_maybenull_
-          EOF
-          cp XBOX/client/sal.h ./sal.h
-
-          cat << 'EOF' >> mbedtls/include/mbedtls/mbedtls_config.h
-          #define MBEDTLS_NO_PLATFORM_ENTROPY
-          #define MBEDTLS_ENTROPY_HARDWARE_ALT
-          EOF
-
-          cat << 'EOF' > XBOX/client/xbox_entropy.c
-          #include <stddef.h>
-          #include <stdint.h>
-
-          int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t *olen) {
-              (void)data;
-              for (size_t i = 0; i < len; i++) {
-                  uint32_t lo, hi;
-                  __asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));
-                  for (volatile int j = 0; j < (lo & 0xF) + 1; j++) {}
-                  __asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));
-                  output[i] = (unsigned char)(lo ^ (lo >> 8));
-              }
-              *olen = len;
-              return 0;
-          }
-          EOF
-
-          MAKEFILE_PATH=$(find . -maxdepth 3 -name "Makefile" | head -n 1)
-          echo "Found Makefile at: $MAKEFILE_PATH"
-          if [ -n "$MAKEFILE_PATH" ] && grep -q "^SRCS" "$MAKEFILE_PATH"; then
-            sed -i 's|^SRCS[[:space:]]*=|SRCS = XBOX/client/xbox_entropy.c |' "$MAKEFILE_PATH"
-          fi
+          mkdir -p mbedtls/include/mbedtls
+          touch mbedtls/include/sal.h
+          python3 mbedtls/scripts/config.py unset MBEDTLS_TIMING_C
+          python3 mbedtls/scripts/config.py unset MBEDTLS_NET_C
+          python3 mbedtls/scripts/config.py unset MBEDTLS_FS_IO
+          python3 mbedtls/scripts/config.py unset MBEDTLS_ENTROPY_PLATFORM
 
       - name: Compile XBE
         run: |
-          MAKEFILE_DIR=$(dirname "$(find . -maxdepth 3 -name "Makefile" | head -n 1)")
+          # Exclude mbedtls so find only locates your project's Makefile
+          MAKEFILE_DIR=$(dirname "$(find . -path ./mbedtls -prune -o -maxdepth 3 -name "Makefile" -print | head -n 1)")
+          echo "Building in: $MAKEFILE_DIR"
           make -C "$MAKEFILE_DIR"
 
       - name: Upload XBE Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dominos-app-for-XBOX
+          name: xbox-xbe
           path: "**/*.xbe"
