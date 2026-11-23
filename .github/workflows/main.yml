@@ -29,7 +29,10 @@ jobs:
       - name: Create stub sal.h and configure mbedtls for NXDK
         run: |
           mkdir -p mbedtls/include/mbedtls
-          touch mbedtls/include/sal.h
+          cat << 'EOF' > mbedtls/include/sal.h
+          #pragma once
+          #define _Check_return_
+          EOF
           sed -i 's|^#define MBEDTLS_TIMING_C|//#define MBEDTLS_TIMING_C|' mbedtls/include/mbedtls/mbedtls_config.h
           sed -i 's|^#define MBEDTLS_NET_C|//#define MBEDTLS_NET_C|' mbedtls/include/mbedtls/mbedtls_config.h
           sed -i 's|^#define MBEDTLS_FS_IO|//#define MBEDTLS_FS_IO|' mbedtls/include/mbedtls/mbedtls_config.h
