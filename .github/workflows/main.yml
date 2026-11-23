@@ -1,0 +1,25 @@
+yaml
+name: Build Xbox XBE
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/xboxdev/nxdk:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Compile XBE
+        run: make -C client
+
+      - name: Upload XBE Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dominos-Xbox-App
+          path: client/**/*.xbe
