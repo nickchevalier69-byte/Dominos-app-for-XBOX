@@ -22,7 +22,10 @@ jobs:
           path: mbedtls
 
       - name: Compile XBE
-        run: export PATH="/usr/src/nxdk/bin:$PATH" && make -C client
+        run: |
+          touch mbedtls/include/sal.h
+          export PATH="/usr/src/nxdk/bin:$PATH"
+          make -C client
 
       - name: Upload XBE Artifact
         uses: actions/upload-artifact@v4
