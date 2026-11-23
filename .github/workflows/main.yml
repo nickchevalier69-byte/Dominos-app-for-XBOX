@@ -48,6 +48,8 @@ jobs:
           #endif
           EOF
 
+          sed -i 's|^#pragma comment(lib, "ws2_32.lib")|//#pragma comment(lib, "ws2_32.lib")|' mbedtls/library/*.c
+
           sed -i 's|^#define MBEDTLS_TIMING_C|//#define MBEDTLS_TIMING_C|' mbedtls/include/mbedtls/mbedtls_config.h
           sed -i 's|^#define MBEDTLS_NET_C|//#define MBEDTLS_NET_C|' mbedtls/include/mbedtls/mbedtls_config.h
           sed -i 's|^#define MBEDTLS_FS_IO|//#define MBEDTLS_FS_IO|' mbedtls/include/mbedtls/mbedtls_config.h
