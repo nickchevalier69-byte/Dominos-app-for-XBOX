@@ -30,10 +30,10 @@ jobs:
         run: |
           mkdir -p mbedtls/include/mbedtls
           touch mbedtls/include/sal.h
-          python3 mbedtls/scripts/config.py unset MBEDTLS_TIMING_C
-          python3 mbedtls/scripts/config.py unset MBEDTLS_NET_C
-          python3 mbedtls/scripts/config.py unset MBEDTLS_FS_IO
-          python3 mbedtls/scripts/config.py unset MBEDTLS_ENTROPY_PLATFORM
+          sed -i 's|^#define MBEDTLS_TIMING_C|//#define MBEDTLS_TIMING_C|' mbedtls/include/mbedtls/mbedtls_config.h
+          sed -i 's|^#define MBEDTLS_NET_C|//#define MBEDTLS_NET_C|' mbedtls/include/mbedtls/mbedtls_config.h
+          sed -i 's|^#define MBEDTLS_FS_IO|//#define MBEDTLS_FS_IO|' mbedtls/include/mbedtls/mbedtls_config.h
+          sed -i 's|^#define MBEDTLS_ENTROPY_PLATFORM|//#define MBEDTLS_ENTROPY_PLATFORM|' mbedtls/include/mbedtls/mbedtls_config.h
 
       - name: Compile XBE
         run: |
