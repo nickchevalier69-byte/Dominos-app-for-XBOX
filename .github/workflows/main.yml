@@ -10,7 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: nxdk/nxdk:latest
+      image: ghcr.io/xboxdev/nxdk:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout code
@@ -37,7 +40,6 @@ jobs:
 
       - name: Compile XBE
         run: |
-          # Exclude mbedtls so find only locates your project's Makefile
           MAKEFILE_DIR=$(dirname "$(find . -path ./mbedtls -prune -o -maxdepth 3 -name "Makefile" -print | head -n 1)")
           echo "Building in: $MAKEFILE_DIR"
           make -C "$MAKEFILE_DIR"
