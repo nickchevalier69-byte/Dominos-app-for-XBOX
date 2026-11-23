@@ -14,8 +14,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Clone mbedtls
-        run: git clone --depth 1 --branch v2.28.8 https://github.com mbedtls
+      - name: Checkout mbedtls
+        uses: actions/checkout@v4
+        with:
+          repository: Mbed-TLS/mbedtls
+          ref: v2.28.8
+          path: mbedtls
 
       - name: Compile XBE
         run: export PATH="/usr/src/nxdk/bin:$PATH" && make -C client
