@@ -18,8 +18,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Checkout mbedtls v3.6.2
         uses: actions/checkout@v4
@@ -27,7 +25,6 @@ jobs:
           repository: Mbed-TLS/mbedtls
           ref: v3.6.2
           path: mbedtls
-          submodules: recursive
 
       - name: Create stub sal.h and configure mbedtls for NXDK
         run: |
